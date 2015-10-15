@@ -3,6 +3,11 @@
 
 See project live at: [http://ec2-52-27-192-5.us-west-2.compute.amazonaws.com/](http://ec2-52-27-192-5.us-west-2.compute.amazonaws.com/)
 
+Notes for reviewer:
+* public Ip: `52.27.192.5`
+* SSH PORT: `2200`
+* Full project URL: [http://ec2-52-27-192-5.us-west-2.compute.amazonaws.com/](http://ec2-52-27-192-5.us-west-2.compute.amazonaws.com/)
+
 ### Tasks given and method for completion:
 
 * Launch your Virtual Machine with your Udacity account
