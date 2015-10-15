@@ -1,12 +1,13 @@
 #Linux Server Configuration
 ## Project 5 for Udacity Full-Stack Nanodegree
 
+See project live at: [http://ec2-52-27-192-5.us-west-2.compute.amazonaws.com/](http://ec2-52-27-192-5.us-west-2.compute.amazonaws.com/)
 
 ### Tasks given and method for completion:
 
 * Launch your Virtual Machine with your Udacity account
     * Must be logged into your Udacity account.
-    * Visit this [link](https://www.udacity.com/account#!/development_environment) and press Create Development Enviroment.
+    * Visit this [link](https://www.udacity.com/account#!/development_environment) and press Create Development Environment.
 
 
 * Follow the instructions provided to SSH into your server
@@ -32,10 +33,10 @@
 * Update all currently installed packages
     * Find updates:`sudo apt-get update`
     * Install updates:`sudo sudo apt-get upgrade` Hit Y for yes and give yourself a break while it installs.
-* Change the SSH port from 22 to 2200 and other SSH configuation required from [grading rubic](https://www.udacity.com/course/viewer#!/c-nd004/l-3573679011/m-3608778867)
+* Change the SSH port from 22 to 2200 and other SSH configuration required from [grading rubic](https://www.udacity.com/course/viewer#!/c-nd004/l-3573679011/m-3608778867)
     * `nano /etc/ssh/sshd_config` change `port 22` to `port 2200`
     * while in the file also change `PermitRootLogin without-password` to `PermitRootLogin no` to disallow root login
-    * Change `PasswordAuthentication` from `no` to `yes`. We will change back after finshing SHH login setup
+    * Change `PasswordAuthentication` from `no` to `yes`. We will change back after finishing SHH login setup
     * append `AllowUsers grader ` inside file to allow grade to login through SSH
     * save file(nano: `ctrl+x`, `Y`, Enter)
     * restart ssh service`sudo service ssh reload`
@@ -43,9 +44,9 @@
 
 * Create SSH keys and copy to server manually:
     * On your local machine generate SSH key pair with: `ssh-keygen`
-    * save youkeygen file in your ssh directory `/Users/username/.ssh/` example full file path that could be used: `/Users/sageelliott/.ssh/project5`
-    * You can add a password to use incase your keygen file gets comprimised(you will be prompted to enter this password when you connect with key pair)
-    * login into grader account using password set during user creation `ssh -v grader@*Public-IP-Addres* -p 2200`
+    * save youkeygen file in your ssh directory `/Users/username/.ssh/` example full file path that could be used: `/Users/username/.ssh/project5`
+    * You can add a password to use encase your keygen file gets compromised(you will be prompted to enter this password when you connect with key pair)
+    * login into grader account using password set during user creation `ssh -v grader@*Public-IP-Address* -p 2200`
     * Make .ssh directory`mkdir .ssh`
     * make file to store key`touch .ssh/authorized_keys`
     * On your local machine read contents of the public key `cat .ssh/project5.pub`
@@ -55,9 +56,9 @@
     * Set permissions for files: `chmod 700 .ssh` `chmod 644 .ssh/authorized_keys`
     * Change `PasswordAuthentication` from `yes` back to `no`.  `nano /etc/ssh/sshd_config`
     * save file(nano: `ctrl+x`, `Y`, Enter)
-    * login with key pair: `ssh grader@Public-IP-Addres* -p 2200 -i ~/.ssh/project5`
+    * login with key pair: `ssh grader@Public-IP-Address* -p 2200 -i ~/.ssh/project5`
 
-    * alternativly you can use a shorter method found [here](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server)
+    * alternatively you can use a shorter method found [here](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server)
 
 
 * Configure the Uncomplicated Firewall (UFW) to only allow  incoming connections for SSH (port 2200), HTTP (port 80),  and NTP (port 123)
@@ -124,7 +125,7 @@
 
 * Configure And Enable New Virtual Host
     * Create host config file `sudo nano /etc/apache2/sites-available/catalog.conf`
-    * paste the folowing:
+    * paste the following:
 
     ```
     <VirtualHost *:80>
@@ -184,7 +185,7 @@
     * `sudo pip install --upgrade oauth2client`
     * `sudo pip install sqlalchemy`
     * `pip install Flask-SQLAlchemy`
-    * `sudo apt-get install python-psycopg2`
+    * `sudo pip install python-psycopg2`
     * If you used any other packages in your project be sure to install those as well.
 
 
@@ -195,29 +196,67 @@
     * config database_setup.py `sudo nano database_setup.py`
     * `python engine = create_engine('postgresql://catalog:db-password@localhost/catalog')`
     * repeat for application.py(main.py)
-    * `mv application.py __init__.py`
-    * `sudo adduser catalog`
-    * `sudo su - postgres`
-    * `psql`
-    * `CREATE USER catalog WITH PASSWORD 'db-password';`
-    * ` ALTER USER catalog CREATEDB;`
-    * `\du`
-    * `CREATE DATABASE catalog WITH OWNER catalog;`
-    * `\c catalog`
-    * `REVOKE ALL ON SCHEMA public FROM public;`
-    * `GRANT ALL ON SCHEMA public TO catalog;`
-    *   `\q`
-    *  `exit`
-    *  `python database_setup.py`
+    * copy your main app.py file into the __init__.py file `mv app.py __init__.py`
+    * Add catalog user `sudo adduser catalog`
+    * login as postgres super user`sudo su - postgres`
+    * enter postgres`psql`
+    * Create user catalog`CREATE USER catalog WITH PASSWORD 'db-password';`
+    * Change role of user catalog to creatDB` ALTER USER catalog CREATEDB;`
+    * List all users and roles to verify`\du`
+    * Create new DB "catalog" with own of catalog`CREATE DATABASE catalog WITH OWNER catalog;`
+    * Connect to database`\c catalog`
+    * Revoke all rights `REVOKE ALL ON SCHEMA public FROM public;`
+    * Give accessto only catalog role`GRANT ALL ON SCHEMA public TO catalog;`
+    *   Quit postgres`\q`
+    *  logout from postgres super user`exit`
+    *  Setup your database schema `python database_setup.py`
 
-    **ERROR CANNOT IMPORT PSYCOPG2**
+    * I had problems importing psycopg2 [this](http://stackoverflow.com/questions/5629368/installing-psycopg2-into-virtualenv-when-postgresql-is-not-installed-on-developm) stack overflow post helped me
+    * retstart apache `sudo service apache2 restart`
+
+    * I was getting a `No such file or directory: 'client_secrets.json'` error. I fixed using a raw path to the file `open(r'/var/www/catalog/catalog/client_secrets.json', 'r').read())...` You'll also need to do this for any other instances of the file path
+    [stack overflow](http://stackoverflow.com/questions/12201928/python-open-method-ioerror-errno-2-no-such-file-or-directory)
 
 
-    CREATE USER catalog WITH PASSWORD 'catalog';
+* fix OAuth to work with hosted Application
+        * Google wont allow the IP address to make redirects so we need to set up the host name address to be usable.
+    * go to [http://www.hcidata.info/host2ip.cgi](http://www.hcidata.info/host2ip.cgi) to get your host name by entering your public IP address Udacity gave you.
+    * open apache configbfile `sudo nano /etc/apache2/sites-available/catalog.conf`
+    * below the `ServerAdmin` paste `ServerAlias YOURHOSTNAME`
+    * make sure the virtual host is enabled `sudo a2ensite catalog`
+    * restart apache server `sudo service apache2 restart`
+    * in your google developer console add your host name and IP address to Authorized Javascript origins. And add YOURHOSTNAME/ouath2callback to the Authorized redirect URIs.
+    * Note that it may take a few minutes for you to see changes, so if you still can't login right away don't panic!
 
-* Create a new user named catalog that has limited permissions to your catalog application database
 
-## Sources
+##Exceeds specs requirements
+
+
+* Install glances for monitoring (Exceeds specs requirement)
+    * install glances `sudo pip install Glances`
+    * run `glances` to see monitor
+
+* Configure firewall to monitor for unsuccessful attempts and use cron scripts to automatically manage packages (Exceeds specs requirement)
+
+    * install fail2band `sudo apt-get install fail2ban`
+    * copy config file to .local `sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local`
+    * open .local config file to set parameters `sudo nano /etc/fail2ban/jail.local` Make at least the following changes. You can change bantime or other settings as well. This will allow email with log info and set SSH to the correct port.
+
+    ```
+  destemail = YOURNAME@DOMAIN
+  action = %(action_mwl)s
+  under [ssh] change port = 2220
+  ```
+
+  * install sendmail`sudo apt-get install nginx sendmail`
+  * stop service `sudo service fail2ban stop`
+  * Start service `sudo service fail2ban start`
+
+  * install unattended-upgrades `sudo apt-get install unattended-upgrades`
+  * enable `sudo dpkg-reconfigure -plow unattended-upgrades`
+  * Automatically install security updates
+
+## Sources used:
 [Configuring Linux Web Servers - Udacity.com](https://www.udacity.com/course/viewer#!/c-ud299-nd/l-4378692847/m-4799370031)
 
 [Get rid of sudo error message - askubuntu](http://askubuntu.com/questions/59458/error-message-when-i-run-sudo-unable-to-resolve-host-none)
@@ -236,6 +275,14 @@
 
 [Make .git directory web inaccessible](http://stackoverflow.com/questions/6142437/make-git-directory-web-inaccessible)
 
+[Fix google + Oauth issue - Udacity Forum](https://discussions.udacity.com/t/google-sign-in-problems/28191)
+
+[Using glances - Glances docs](http://glances.readthedocs.org/en/latest/glances-doc.html#configuration)
+
+[Use fail2ban to monitor login - digital ocean](https://www.digitalocean.com/community/tutorials/how-to-protect-ssh-with-fail2ban-on-ubuntu-14-04)
+
 [Python 2 in virtual enviroment](http://joebergantine.com/blog/2015/apr/30/installing-python-2-and-python-3-alongside-each-ot/)
+
+[unattended upgardes - ubuntu docs](https://help.ubuntu.com/community/AutomaticSecurityUpdates)
 
 [Using postgres in flask](http://blog.sahildiwan.com/posts/flask-and-postgresql-app-deployed-on-heroku/)
